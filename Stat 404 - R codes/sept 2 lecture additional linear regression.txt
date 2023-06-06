@@ -1,0 +1,66 @@
+
+# Introduction to applications of linear algebra and R 
+# using simple linear regression
+
+# Read dataset from Rizzardi's dataset page
+births <- read.table("http://users.humboldt.edu/rizzardi/Data.dir/birthwt",header=T,skip=4)
+str(births) # describe structure of "data frame"
+head(births) # first few lines
+dim(births) # dimension of data fram
+gest # gest not in search path of R
+search() # .GlobalEnv is the global environment which our interactive workspace
+attach(births)  # Now R will look into "births" data frame for variables
+search()
+gest  
+
+fit1 <- lm( weight ~ gest )  # fit linear model to data
+fit1
+names(fit1)
+fit1$coef   # abbreviated fit1$coefficients
+summary( fit1 )
+
+plot( gest, weight )
+abline( fit1 )  # equivalent to abline(a=-1485, b=115.5)
+title( "Using gestation to predict birth weight")
+points( jitter(gest), predict(fit1), pch="X") # lay points on pre-existing plot
+jitter( c(2,2,2,2) ) # add a little noise to prevent hiding from overlap, see help(jitter)
+
+# Let's use linear algebra and do it ourselves
+X <- cbind(1,gest)
+head(X)
+y <- weight
+b <- solve( t(X)%*%X) %*% t(X) %*% y  # Math which minimizes sum of squared residuals
+b
+yhat <- X %*% b
+
+# We get the same result as from lm( ) function
+head(cbind(yhat,predict(fit1), (y-yhat), residuals(fit1))) # We get the same result as from lm( ) function
+sum(residuals(fit1)^2) # sum of the squared residuals; i.e., SSR
+t(y-yhat) %*% (y-yhat)  # linear algebra to do SRR  
+#Note sum of residuals is 0
+sum(residuals(fit1))
+
+
+#Estimate residual standard error; i.e., sd( error term )
+RSE <- sqrt(sum(residuals(fit1)^2)/ (24-2) )  # compare to summary table
+RSE
+
+summary(fit1)$coef
+
+# Standard error of b1 (or Mean Squared Error - MSE )
+b1.se <- sqrt( RSE^2 / sum( (gest-mean(gest))^2 ) ) ; b1.se
+# Standard error for b0
+# extra parentheses show value
+( b0.se <- sqrt( RSE^2 * sum(gest^2) / (24*sum( (gest-mean(gest))^2 ) ) ) )
+
+# Linear algebra equivalent
+RSE^2 * solve( t(X)%*%X )  # variance-covariance matrix 
+diag(   RSE^2 * solve( t(X)%*%X ) ) # diagonals of matrix
+sqrt( diag(   RSE^2 * solve( t(X)%*%X ) ) ) 
+
+# t-statistic and two-tailed p-value
+( tstat.b1 <- b[2]/b1.se )  # t-stat for b1
+2*(1-pt(tstat.b1,df=22) )
+2* pt(tstat.b1, df=22, lower.tail=F ) # The equivalent
+
+detach(births)

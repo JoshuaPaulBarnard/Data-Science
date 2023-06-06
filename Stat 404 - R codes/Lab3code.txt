@@ -1,0 +1,199 @@
+# Stat504, Lab 3 code
+
+#1a
+pnorm(-1.96); pnorm(-1.96, mean=0, sd=1)
+
+#1b
+1-pnorm(1.645); pnorm(1.645, lower.tail=F)
+
+#1c
+pnorm(88, mean=100, sd=6 )
+
+#1d
+qnorm(0.975, mean=100, sd=6)
+
+#1e
+qnorm(0.75, mean=100, sd=6)
+
+#1f
+dnorm(100, mean=100, sd=6)
+
+#1g
+pt( 1.96, df=5)
+
+#1h
+x <- seq(from=0,to=15, by=.01)
+y <- dchisq( x, df=3 )
+plot( x,y, type="l" , ylab="density, f(x)", main="Chi-square, df=3")
+
+#1i
+punif(0.75); punif(0.75, min=0, max=1 )
+
+#1j
+# f(x)=1 when 0<=x<=1 because uniform density curve is a rectangle and
+# total area must equal 1.  height*base=height*1=1, thus height=1.
+dunif(0.75, min=0, max=1)
+
+#1k
+dbinom(5, size=10, prob=0.5 )
+
+#1l
+pbinom(5, size=10, p=0.5 )
+
+#1m
+pbinom(4, size=10, p=0.5 )
+
+#1n
+x <- 0:10
+y <- dbinom(x, size=10, p=0.5)
+barplot(y,names=0:10, 
+	xlab="x=number of heads from 10 fair coin tosses", 
+      ylab="P(x)")
+
+#2a
+x <- rnorm(5000, mean=100, sd=6 )
+hist(x, breaks=40 )
+ # or one of many other ways...
+dev.new()
+hist(x, breaks=seq(from=min(x)-.1,to=max(x)+.1,length=41) )
+
+#2b
+# Histograms are for continuous data.  Bar plots are good for 
+# discrete data or categorical data.
+
+#2c
+( y <- rbinom( 20, size=10, p=.5) )
+
+#2d
+# set.seed() sets the initial number for the random generator.  
+# Resetting set.seed() allows you to duplicate "random" numbers again.
+
+#2e
+u <- runif(5000)
+hist(u)
+
+#2f
+v <- u*10
+hist(v)
+# v is distributed uniform(min=0,max=10)
+
+#2g
+x <- qnorm(u, mean=100, sd=6 )
+hist(x, breaks=20)
+
+#2h
+u <- runif(1000, min=-10, max=10 )
+w <- runif(1000, min=-10, max=10 )
+plot(u,w)
+
+#2i
+library(MASS)
+V <- matrix(c( 1,  .2,  -.6,
+              .2,   1,   .4, 
+             -.6,  .4,    2),ncol=3) 
+V #Covariance matrix
+X <- mvrnorm( 100, mu=c(0,0,3), Sigma=V )
+pairs(X, labels=c("A","B","C"))
+apply(X, 2, mean)
+cov(X); var(X)
+
+#3a
+pvalues <- rep(NA,1000)
+for( i in 1:1000 )
+{
+  x <- rnorm(30, mean=100, sd=6)
+  y <- rnorm(30, mean=100, sd=6)
+  pvalues[i] <- t.test(x,y)$p.value
+}
+
+#3b
+mean( pvalues<=0.05 ) # fraction of p-values <= 0.05
+
+#3c
+hist(pvalues) # looks like uniform(0,1) distribution
+
+#3d
+u <- runif(1000)
+plot( sort(pvalues), sort(u) )
+abline(a=0,b=1) #points on line suggest distributions similar
+
+#4a
+pvalues <- rep(NA,1000)
+for( i in 1:1000 )
+{
+  x <- rnorm(30, mean=100, sd=6)
+  y <- rnorm(30, mean=101, sd=6)
+  pvalues[i] <- t.test(x,y)$p.value
+}
+mean( pvalues<=0.05 ) # fraction of p-values <= 0.05
+# power is around 9%
+
+#4b
+pvalues <- rep(NA,1000)
+for( i in 1:1000 )
+{
+  x <- rnorm(30, mean=100, sd=6)
+  y <- rnorm(30, mean=102, sd=6)
+  pvalues[i] <- t.test(x,y)$p.value
+}
+mean( pvalues<=0.05 ) # fraction of p-values <= 0.05
+# power around 24%
+
+#4c
+pvalues <- rep(NA,1000)
+for( i in 1:1000 )
+{
+  x <- rnorm(30, mean=100, sd=6)
+  y <- rnorm(30, mean=104, sd=6)
+  pvalues[i] <- t.test(x,y)$p.value
+}
+mean( pvalues<=0.05 ) # fraction of p-values <= 0.05
+# power around 72%
+
+#4d 
+pvalues <- rep(NA,1000)
+for( i in 1:1000 )
+{
+  x <- rnorm(30, mean=100, sd=6)
+  y <- rnorm(30, mean=106, sd=6)
+  pvalues[i] <- t.test(x,y)$p.value
+}
+mean( pvalues<=0.05 ) # fraction of p-values <= 0.05
+# power around 97%
+
+
+#4e
+power.t.test( n=30, delta=c(1,2,4,6), sd=6 )
+
+#4f
+power.t.test( power=.9, delta=1, sd=6 ) # would need n=758
+
+#4g
+pvalues <- rep(NA,1000)
+for( i in 1:1000 )
+{
+  x <- rnorm(758, mean=100, sd=6)
+  y <- rnorm(758, mean=101, sd=6)
+  pvalues[i] <- t.test(x,y)$p.value
+}
+mean( pvalues<=0.05 ) # fraction of p-values <= 0.05
+# My simulation gave 89.7% of tests being significant
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,52 @@
+# Manly Skull data, but with text in place of years
+# Abr.Period: e=-4000, l=-3300, m=-1850,  p=-200, r=150
+skulls <- read.csv(file="http://users.humboldt.edu/rizzardi/Data.dir/skulls2.csv",header=T,skip=4)
+attach( skulls )
+str(skulls)
+unique(Abr.Period)
+
+# library( MASS )
+
+lda1 <- lda( Abr.Period ~ Max.breadth + Basibreg.ht + Basial.ht + Nasal.ht )
+lda1
+lda1pred <- predict(lda1)
+head( data.frame(  Abr.Period, lda1pred$class , round(lda1pred$posterior,3 ) ) )
+
+plot( lda1pred$x[,1:2] , pch=paste(Abr.Period), col=ifelse(lda1pred$class==Abr.Period,"red","blue") )
+title(main="Red=misclassification", sub="letter=actual class" )
+
+plot( lda1pred$x[,1:2] , pch=paste(lda1pred$class), col=ifelse(lda1pred$class==Abr.Period,"red","blue") )
+title(main="Red=misclassification", sub="letter=predicted class" )
+
+# Predict class and probabilities using cross-validation
+lda2 <- lda( Abr.Period ~ Max.breadth + Basibreg.ht + Basial.ht + Nasal.ht, CV=T )
+names(lda2) # different output when CV=T
+names(lda1)
+head( data.frame( lda2$class, round(lda2$posterior,3) ) )
+head( data.frame( Abr.Period, lda1pred$class, round(lda1pred$posterior,2 ) ) )
+
+# Cross-validation, albeit more realistic, did more poorly on training set.
+# CV got 43 correct compared to 51 correct
+table( Abr.Period, lda1pred$class ); sum( diag(table( Abr.Period, lda1pred$class ))  )
+table( Abr.Period, lda2$class ); sum( diag( table( Abr.Period, lda2$class ) ) )
+
+
+Cross-validation
+
+ i = 1
+ ilda <- lda( Abr.Period ~ Max.breadth + Basibreg.ht + Basial.ht + Nasal.ht, data=skulls[-i,], prior=rep(.2,5) )
+ predict(ilda, newdata=skulls[i,])
+
+CVprobs <- matrix( NA, ncol=5, nrow=150 )
+for( i in 1:150 )
+{
+  ilda <- lda( Abr.Period ~ Max.breadth + Basibreg.ht + Basial.ht + Nasal.ht, data=skulls[-i,], prior=rep(.2,5) )
+  CVprobs[i,] <- predict( ilda, newdata=skulls[i,] )$posterior
+}
+
+head( CVprobs )
+  
+
+
+
+

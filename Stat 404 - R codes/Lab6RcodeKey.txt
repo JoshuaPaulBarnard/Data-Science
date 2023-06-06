@@ -1,0 +1,153 @@
+################## Lab 6 R code Key ##################
+Euro <- read.csv(file="http://users.humboldt.edu/rizzardi/Data.dir/EuroEmployManly.csv",
+header=T, skip=7)
+str(Euro)
+
+#1a
+Euro.scaled <- scale(Euro[,3:11])
+signif( cov( Euro.scaled ) )
+pairs( Euro.scaled )
+
+#1b
+# AGR seems to have strong negative correlations with SPS (r=-0.81) and 
+# SER (r=-0.604), likewise between MIN and MAN (r=-0.67).
+# The strongest positive correlation is between SPS and TC (r=0.47) and
+# SER and CON (r=0.47).  On the other end of the spectrum, the correlations
+# closest to zero are FIN and CON (r=-0.02), SER and MAN (r=-0.03), and
+# CON and MAN (r=-0.03). MIN, and to a lesser degree PS, is frequently very 
+# small with just a few values not near zero. 
+
+#1c
+eigenvals <- eigen(cov(Euro.scaled))$values
+signif(eigenvals )
+sum( eigenvals ) 
+# sum of eigenvalues=9 which is number of variables
+# Since var(X)=1 for each variable sum( eigenvalues ) = sum(var(variables))=9
+eigenvects <- eigen(cov(Euro.scaled))$vectors
+signif(eigenvects,3)
+
+EuroPCA <- prcomp( Euro[,3:11], scale=T )
+
+#1d
+EuroPCA$sdev^2
+eigenvals
+# Squaring the standard deviations for each of the principal components
+# gives you the corresponding eigen value.  That is, the eigen values
+# correspond to the variances of each principal component.
+
+#1e
+EuroPCA$rotation
+eigenvects
+# For our case, -1*eigen vector = rotation vectors = loadings
+# The -1 just flips the data, so is unimportant.
+
+#1f
+sum( eigenvals > 1 )  # 4 eigen values are greater than 1.
+
+#1g
+summary( EuroPCA ) # Cumulative proportion of variance hits 80% by PC4
+
+#1h
+dev.new()
+screeplot( EuroPCA ) 
+# Scree plt shows biggest drop after PC1. Steady
+# dropping until PC5. There is not obvious point where it flattens out.
+
+#1i
+dev.new()
+biplot(EuroPCA, scale=0)
+# AGR and MIN are far to the right on the x-axis because their loadings
+# for PC1 are 0.51 and 0.37 while all others are negative.  AGR and MIN's 
+# loadings for PC2 are 0.02 and 0.00, thus their y-axis values are essentially
+# zero.  MAN and TC both have negative PC1 and PC2 loadings that are not
+# near zero.
+
+#1j
+#PC1 for Belgium
+EuroPCA$rotation[,1:2] #loadings for PC1 and PC2
+EuroPCA$x[1,1:2] # Belgium's Z values for PC1 and PC2
+Euro.scaled[1,] #Belgium scaled economic value
+
+#PC1 for Belgium = PC1 loadings %*% Belgium scaled values
+# Using linear algebra
+EuroPCA$rotation[,1] %*% Euro.scaled[1,]
+# Equivalent by hand
+-0.77896674 *0.5114918 + -0.36620404 *0.3749833  + 0.05428199 *-0.2461613  + 
+ 0.00000000 *-0.3161203 + -0.45004074 * -0.2215986 + 0.24482455 *-0.3815359 +                          
+ 0.51421227 *-0.1310884 +  1.13451620 * -0.4281618  + 0.28107329 *-0.2050706
+
+#PC2 for Belgium = PC2 loadings %*% Belgium scaled values
+# Using linear algebra
+EuroPCA$rotation[,2] %*% Euro.scaled[1,]
+
+#1k
+pc1 <- EuroPCA$x[,1]
+pc2 <- EuroPCA$x[,2]
+dev.new()
+plot( pc1, pc2, xlab="PC1", ylab="PC2", type="n" )
+text( pc1, pc2, Euro$Country, cex=.6, 
+     col=c(rep(c("blue","green","red","black"),c(12,6,8,4))))
+legend(4,-1, legend=c("EU","EFTA","Eastern","Other"), text.col=c("blue","green","red","black"))
+
+#1L
+#The EU and EFTA countries seem similar with PC1 loadings just slightly 
+#less than zero but PC2 being slightly more than 0.  The Eastern block 
+#countries are spread out differently, but still in their own geographic
+#groups (Balkan, Eastern Europe, and Albania by itself).
+
+#1M
+#AGR and MIN are contrasted with all the other variables in creating PC1.
+# So this is more of a natural resources vs. service economy.
+
+#Problem 2
+Protein<-read.csv(
+     file="http://users.humboldt.edu/rizzardi/Data.dir/EuroProtein.csv",
+     header=T,skip=5)
+str(Protein)
+
+#2a
+pairs( Protein[,-c(1,11)] )
+cor( Protein[,-c(1,11)] )
+
+#2b
+ProtPCA <- prcomp( Protein[,-c(1,11)],scale=T) 
+#f
+ProtPCA$sd^2  # PC1, PC2, and PC3 have eigenvalues larger than 1
+#g
+summary( ProtPCA ) # Suggests PC1, PC2, PC3, and PC4 to reach >=80%
+#h
+screeplot( ProtPCA ) # Suggests either just PC1 (my preference) or PC1 through PC4.
+
+#2c
+biplot( ProtPCA, scale=0 )
+
+#2d
+pc1 <- ProtPCA$x[,1]
+pc2 <- ProtPCA$x[,2]
+dev.new()
+plot( pc1, pc2, xlab="PC1", ylab="PC2", type="n" )
+text( pc1, pc2, Protein$Country, cex=.6, )
+
+#2e
+#This is harder to figure out.  For PC1, cereals , nuts/oils/seeds,
+#and vegetables are positive while the other variables (flesh and starch)
+#are negative.  This suggests countries to the left of zero are more
+#flesh/starch oriented while those to the right are more plant based.
+#PC2 is heavy on fish, vegetables, and starch.
+
+#2f
+#This continues to be not so obvious.  PC1 suggests plant based diet (other
+#than starch - potato?) vs. flesh diets.  PC2 emphasizes fish and vegetables.
+
+
+
+
+
+
+
+
+
+
+
+
+

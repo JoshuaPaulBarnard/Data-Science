@@ -1,0 +1,25 @@
+birds <- read.csv(file="http://users.humboldt.edu/rizzardi/Data.dir/BirdLengWingMass.txt",
+header=T,skip=13)
+
+attach(birds)
+pairs( birds[,-1] )
+plot( log(birds$LengthIN), log(birds$WeightOZ), main="log-log plot" )
+plot( log(birds$WingspanIN), log(birds$WeightOZ), main="log-log plot" )
+# See https://en.wikipedia.org/wiki/Log-log_plot
+
+fit1 <- prcomp( ~ . - Species, data=birds, scale=T)
+fit1
+summary(fit1)
+biplot(fit1)
+
+plot( fit1$x[,1], fit1$x[,2], xlab="PCA1", ylab="PCA2", type="n")
+text( fit1$x[,1], fit1$x[,2], cex=.6 )
+
+order( c(8,9,7,6) ) # tells how to rearrange vector to sequence
+# sort by pc1
+data.frame( birds[order(fit1$x[,1]),1] , sort(fit1$x[,1]) )
+
+# sort by pc2
+data.frame( birds[order(fit1$x[,2]),1] , sort(fit1$x[,2]) )
+
+birds[26,]

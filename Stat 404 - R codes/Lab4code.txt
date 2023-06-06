@@ -1,0 +1,17 @@
+males <- c(120,107,110,116,114,111,113,117,114,112) #original data
+females <- c(110,111,107,108,110,105,107,106,111,111) # original data
+d0 <- mean(males) - mean(females)
+N <- 4999  # number of randomizations
+dvector <- rep(NA,N)
+jackals <- c(males,females)  # combine into one vector
+for( i in 1:N)
+{
+  NewMix <- sample(jackals, size=20, replace=F)
+  NewMales <- NewMix[1:10]       # new males under null hypothesis 
+  NewFemales <- NewMix[11:20]    # new females under null hypothesis
+  dvector[i] <- mean(NewMales)-mean(NewFemales)
+}
+pval <- ( sum(dvector>=d0)+1 ) / (N+1)   # p-value
+ 
+hist( dvector, main=paste("P-value=",signif(pval,4)), xlab=paste(N,"simulations"))
+abline( v=d0)

@@ -1,0 +1,115 @@
+# Lab 5 Key  	Stat 404/504  
+# Problem 1
+skulls <- read.table(file=
+           "http://users.humboldt.edu/rizzardi/Data.dir/skull.txt",
+		   header=T, skip=16)
+# Enter distmatrix() function as provided in Moodle
+signif(distmatrix(skulls[,1:4], as.factor(skulls[,5]), type="Penrose")$D,3)
+signif(distmatrix(skulls[,1:4], as.factor(skulls[,5]), type="Euclidean")$D,3)
+signif(distmatrix(skulls[,1:4], as.factor(skulls[,5]), type="Mahalanobis")$D,3)
+
+# Problem 1a.
+# The closer skulls are in time, the less "distance" between their measurements.
+
+# Problem 1b.
+# Many choices.  Depends upon student
+
+# Problem 2
+# Problem 2a
+# There are many ways, but here is one..
+dissimilarity <- function(p1,p2)
+{
+  # p1: vector showing proportion of population 1 in different environments
+  # p2: vector showing proportion of population 2 in different environments
+  d1 <- 0.5 * sum( abs(p1-p2) ) # calculating first distance index
+  d2 <- 1 - sum(p1*p2) / sqrt( sum(p1^2)*sum(p2^2) ) # calculating second distance index
+  return( list(d1=d1, d2=d2) ) # returning list of both indices
+}
+
+# Problem 2b
+pop1 <- c( 0.2, 0, 0.3, 0.5, 0 )
+pop2 <- c( 0, .5, 0, 0, .5 )
+pop3 <- pop1
+pop4 <- c( 0.3, 0, 0.2, 0.5, 0 )
+
+dissimilarity( pop1, pop2 ) # no overlap
+dissimilarity( pop1, pop3 ) # total overlap - same distribution 
+dissimilarity( pop1, pop4 ) # partial overla - same environments, but diferent distributions
+
+# Problem 3
+# Problem 3a
+# Here is one possible way to write the function
+PresAbsIndex <- function(PP,PA,AP,AA)
+{
+  n <- PP + PA + AP + AA  # sample size
+  simple <- (PP+AA)/n
+  ochiai <- PP / sqrt( (PP+AP)*(PP+PA) )
+  dice <- 2*PP / (2*PP + AP + PA)
+  jaccard <- PP / (PP+AP+PA)
+  return( list(SimpleMatching=simple,Ochiai=ochiai,DiceSorensen=dice,Jaccard=jaccard) )
+}
+
+# Problem 3b
+PresAbsIndex(10,0,0,15) # 0s for AP and PA, but non-zero values for PP and AA
+PresAbsIndex(0,10,15,0) # 0s for PP and AA, but non-zero values for PA and AP
+PresAbsIndex(10,10,15,15) # a blend 
+
+## Problem 4
+chooseCRANmirror()
+library(ade4)
+
+data(butterfly)
+#names(butterfly)
+#help(butterfly)
+#help(pch)
+plot(butterfly$contour[,1:2], pch=16, cex=.4) # set up x and y limits for graph
+#segments(x0=butterfly$contour[,1],y0=butterfly$contour[,2],
+#          x1=butterfly$contour[,3],y1=butterfly$contour[,4])
+polygon(butterfly$contour[,1:2], lty=2) # does same as segments()
+points(butterfly$xy, pch=7)
+nrow(butterfly$xy)
+text(butterfly$xy, labels=1:16, pos=2, cex=.8)
+(Ddist <- dist(butterfly$xy))
+
+(DGenetEuclidean <- dist(butterfly$genet))
+
+apply(butterfly$genet,1,sum)
+
+dissimilarity <- function(p1,p2)
+{
+  # p1: vector showing proportion of population 1 in different environments
+  # p2: vector showing proportion of population 2 in different environments
+  d1 <- 0.5 * sum( abs(p1-p2) ) # calculating first distance index
+  d2 <- 1 - sum(p1*p2) / sqrt( sum(p1^2)*sum(p2^2) ) # calculating second distance index
+  return( list(d1=d1, d2=d2) ) # returning list of both indices
+}
+
+dissimilarity(butterfly$genet[1,],butterfly$genet[2,])$d1
+
+
+Dgenet <- matrix(NA,nrow=16,ncol=16)
+
+################## Code for problem 4 ##############
+for( i in 1:16 )
+{
+  for( j in 1:16 )
+  {
+    Dgenet[i,j] <- dissimilarity(butterfly$genet[i,],butterfly$genet[j,])$d1
+  }
+}
+
+##################
+Dgenet
+Dgenet <- as.dist(Dgenet)
+plot(Dgenet,Ddist)
+
+(mantel.out <- mantel.rtest(Dgenet,Ddist, nrepet=10000))
+plot(mantel.out)
+
+mantel.euclid <- mantel.rtest(DGenetEuclidean,Ddist,nrepet=10000)
+
+
+
+
+
+  

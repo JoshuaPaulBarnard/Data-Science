@@ -1,0 +1,79 @@
+# HW 7 code
+# Poisson Regression on elephant mating data
+
+#install.packages("Sleuth2")
+#library("Sleuth2")
+#attach(case2201) 
+
+fitA <- glm( Matings ~ Age + I(Age^2), family=poisson )
+
+###########Problem 1
+plot(Age,Matings, main="Problem 1:Matings vs Age")
+plot(Age, log(Matings+0.5), main="Problem 1: log(Matings+0.5) vs Age")
+# Variance of Matings does appear to depend upon Age, although not as 
+# much when the y values are logged.
+
+###########Problem 2
+dev.new()
+pearsonresid <- residuals(fitA,type="pearson")
+plot(Age, pearsonresid, ylab="Pearson Residuals", type="n")
+title(main="Problem 2: Pearson Residuals")
+text(jitter(Age), pearsonresid, cex=ifelse(abs(pearsonresid>=2),1,.5))
+abline(h=c(-2,2),lty=2)
+
+###########Problem 3
+anova( fitA, test="Chisq" )
+# p-value for Age^2 term is 0.6667 which is statistically insignificant
+fitB <- glm( Matings ~ Age, family=poisson )
+pearsonresid <- residuals(fitB,type="pearson")
+dev.new()
+plot(Age, pearsonresid, ylab="Pearson Residuals", type="n")
+title(main="Problem 3: Pearson Residuals of fitB")
+text(jitter(Age), pearsonresid, cex=ifelse(abs(pearsonresid>=2),1,.5))
+abline(h=c(-2,2),lty=2)
+# Fit doesn't seem much different by removing I(Age^2)
+
+###########Problem 4
+summary( fitB )
+# Age coefficient= 0.06869 with SE 0.01375
+# Approximate 95% CI = coefficient +/- 1.96 * SE
+0.06869-1.96*0.01375; 0.06869+1.96*0.01375
+# 95% confidence interval: (0.04, 0.10 )
+# In practice, it'd be better to estimate "overdispersion" and use
+# this to inflate our standard errors estimates. 
+#  We ignored this issue of over/under dispersion in our class where there 
+#  is less or more variance than anticipated.
+
+############ Problem 5
+range(Age)  #27, 52
+newAge <- seq(from=27,to=52, length=1000)
+dev.new()
+plot(newAge, predict( fitB, newdata = data.frame(Age=newAge),type="response" ),
+            type="l",ylab="Expected Count", xlab="Age")
+title( main="Problem 5: Expected counts using model fitB")
+points( jitter(Age), Matings )
+
+############ Problem 6
+exp(0.04); exp( 0.06869); exp(0.10)
+# expect the number of matings to increase by a factor of 7% for each
+# year increase in age (95% CI of 4% to 11%).  
+
+############ Problem 7
+# The expected number of matings increases with age (P<0.001).  
+# The number of matings increases by about 7% for each year
+# increase in age (95% CI of 4 to 11%).
+
+############ Problem 8
+# Dispersion.  Estimate = Pearson X^2 statistic / residual d.f.
+dp <- sum( residuals(fitB, type="pearson") ^ 2 ) / 39
+dp  # 1.157, so ~16% greater variance than anticipated
+summary( fitB, dispersion=dp ) # Note change in SE
+
+
+
+
+
+
+
+
+ 
