@@ -3,9 +3,9 @@
 library(car)
 library(DAAG)
 library(lmtest)
-library(foreign, pos=4)
  
 #Load dataset - if it is not in SPSS format, use RCmdr to load the dataset and exclude these commands
+library(foreign, pos=4)
 Dataset <- read.spss("C:/dataset.sav", use.value.labels=FALSE,max.value.labels=Inf,to.data.frame=TRUE)
 colnames(Dataset) <- tolower(colnames(Dataset))
  
