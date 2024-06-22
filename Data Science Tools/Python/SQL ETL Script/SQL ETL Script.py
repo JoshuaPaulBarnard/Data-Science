@@ -1,7 +1,7 @@
 """
 Author: Joshua Paul Barnard
 Github: https://github.com/JoshuaPaulBarnard/Data-Science
-Date:   June 21st, 2024.
+Date:   June 22nd, 2024.
 
 Description:
     This script performs the following tasks:
@@ -22,7 +22,7 @@ Dependencies:
     - pymysql
 
 Example:
-    Modify the script to include your database connection details and the path to your SQL file. 
+    Modify the script to include your database connection details and the path to your SQL file.
     Run the script using a Python interpreter.
 
 """
@@ -31,20 +31,32 @@ Example:
 import pandas as pd
 from datetime import datetime
 import pymysql
-import pymysql.cursors 
+import pymysql.cursors
+import os
+from dotenv import load_dotenv
 
 # Path to your SQL file
-sql_file_path = '.sql'
+sql_file_path = 'C:/ .sql'
 
 # Create the name for the output file by removing the characters before/after the name of the .sql file
 sql_file_name = sql_file_path[:-4]
 sql_file_name = sql_file_name[3:]
 
-# Database connection parameters
-connection = pymysql.connect(host = '',
-                             user = '', 
-                             password = '', 
-                             database = '',
+# Load environment variables from a .env file
+env_path = 'C:/ .env'
+load_dotenv(dotenv_path=env_path)
+
+# Retrieve database connection parameters from environment variables
+db_host = os.getenv('DB_HOST')
+db_user = os.getenv('DB_USER')
+db_password = os.getenv('DB_PASSWORD')
+db_database = os.getenv('DB_DATABASE')
+
+# Database connection parameters (consider using more secure handling)
+connection = pymysql.connect(host = db_host,
+                             user = db_user,
+                             password = db_password,
+                             database = 'db_database',
                              cursorclass = pymysql.cursors.SSCursor)
 
 # Open the SQL file
@@ -61,20 +73,20 @@ try:
     with connection.cursor() as cursor:
         # Execute your query
         cursor.execute( sql_query )
-        
+
         # Initialize an empty DataFrame
         full_df = pd.DataFrame()
         iterations_count = 0
-        
+
         # Fetch chunks of data
         while True:
             rows = cursor.fetchmany( size = 10000 )  # Adjust size according to your memory capacity
             if not rows:
                 break
-            
+
             # Convert current chunk to DataFrame
             chunk_df = pd.DataFrame( rows, columns=[desc[0] for desc in cursor.description] )
-            
+
             # Concatenate chunk to full DataFrame
             full_df = pd.concat( [full_df, chunk_df], ignore_index = True )
 
